@@ -1,0 +1,56 @@
+<div id="editordiv" ng-controller="editorCtrl">
+  <button type="button" id="saveData" class="btn btn-success" ng-click="saveData()">Save</button>
+  <select id="ledgereditselect" class="form-control" ng-model="selectedledger" ng-change="changeLedger(selectedledger)">
+    <option value="/online.ledger">Main Ledger</option>
+    <option value="/onlineimport.ledger">Imported Transaction Ledger</option>
+    <option value="/onlinebudget.ledger">Budget Ledger</option>
+  </select>
+  <select id="ledgereditaccountsselect" class="form-control" ng-model="selectedaccounts" ng-change="changeAccounts(selectedaccounts)">
+    <option value="allaccounts">All Accounts</option>
+    <option ng-repeat="acct in accountnames" value="_{{acct}}">{{acct}}</option>
+  </select>
+  <button type="button" id="commitToMain" class="btn btn-success" ng-show="selectedledger == '/onlineimport.ledger'" ng-click="commitToMain()">Commit To Main Ledger</button>
+ <button class="btn" ng-click="open()">Edit Text-based Ledger</button>
+ <button class="btn" ng-click="openScriptWindow()">Run User Script</button>
+  <br>
+  <div ui-grid="gridOptions" ui-grid-auto-scroll ui-grid-edit ui-grid-tree-view ui-grid-resize-columns class="grid"></div>
+  <!--div ui-grid="gridOptions" ui-grid-auto-scroll ui-grid-edit ui-grid-tree-view ui-grid-resize-columns ui-grid-cellNav class="grid"></div-->
+
+<script type="text/ng-template" id="rawledgereditor.html">
+    <div class="modal-header">
+        <h4>Ledger Text</h4>
+    </div>
+    <div class="modal-body">
+	<textarea class="modal-editor" id="modaleditor" ng-model="edittext"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" ng-click="ok()">Okay</button>
+      <button class="btn" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="promptcode.html">
+    <div class="modal-header">
+        <h4>Script</h4>
+    </div>
+    <div class="modal-body">
+	<textarea class="modal-editor" ng-model="code"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" ng-click="ok()">Okay</button>
+      <button class="btn" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="uiSelect">
+  <ui-select-wrap>
+    <ui-select ng-model="MODEL_COL_FIELD" on-select="grid.appScope.onSelectCallback($item, $model, row.entity, col)" theme="selectize" ng-disabled="disabled" append-to-body="true">
+      <ui-select-match placeholder="Choose...">{{ COL_FIELD }}</ui-select-match>
+      <ui-select-choices repeat="item in col.colDef.editDropdownOptionsArray | filter: $select.search">
+        <span>{{ item }}</span>
+      </ui-select-choices>
+    </ui-select>
+  </ui-select-wrap>
+</script>
+
+</div>

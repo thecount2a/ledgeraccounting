@@ -1,0 +1,35 @@
+<div>
+  <select id="ledgerreporttimeselect" class="form-control" ng-model="selectedtime" ng-change="changeTime(selectedtime)">
+    <option value="thismonth">This Month</option>
+    <option value="past_2_months">Past 2 Months</option>
+    <option value="past_3_months">Past 3 Months</option>
+    <option value="past_4_months">Past 4 Months</option>
+    <option value="past_6_months">Past 6 Months</option>
+    <option value="thisyear">Year to Date</option>
+    <option value="thisquarter">This Quarter</option>
+    <option value="lastyear">Last Year</option>
+    <option value="thisyear">This Year</option>
+  </select>
+  <select id="ledgerreporttimeperiodselect" class="form-control" ng-model="selectedtimeperiod" ng-change="changeTimePeriod(selectedtimeperiod)">
+    <option value="daily">Daily</option>
+    <option value="weekly">Weekly</option>
+    <option value="monthly">Monthly</option>
+    <option value="quarterly">Quarterly</option>
+    <option value="yearly">Yearly</option>
+  </select>
+  <select id="ledgerreportbudgetperiodselect" class="form-control" ng-model="selectedbudgetperiod" ng-change="changeBudgetPeriod(selectedbudgetperiod)">
+    <option value="monthly">Budget Monthly</option>
+    <option value="quarterly">Budget Quarterly</option>
+    <option value="yearly">Budget Yearly</option>
+  </select>
+  <button type="button" id="reallocate" class="btn btn-success" ng-show="budgetState != 'allocating'" ng-click="startAllocate()">Allocate Budget</button>
+  <button type="button" id="completeallocate" class="btn btn-success" ng-show="budgetState == 'allocating'" ng-click="finishAllocate()">Complete Allocation</button>
+  <span ng-show="budgetState == 'allocating'" style="display: inline;">
+     <input type="text" class="form-control" placeholder="Date" style="display:inline; width: 120px; margin-top: 5px;" datepicker-append-to-body="true" uib-datepicker-popup="yyyy/MM/dd" ng-model="transactiondate" close-text="Close" is-open="transactiondateopened" />
+     <span class="input-group-btn" style="display: inline;">
+       <button type="button" style="display: inline;" class="btn btn-default" ng-click="transactiondateopened = true;"><i class="glyphicon glyphicon-calendar"></i></button>
+     </span>
+  </span>
+  <br>
+  <div ui-grid="gridOptions" ui-grid-pinning ui-grid-edit ui-grid-resize-columns ui-grid-cellNav ui-grid-selection ui-grid-exporter class="grid"></div>
+</div>

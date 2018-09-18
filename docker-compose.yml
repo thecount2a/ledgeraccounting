@@ -1,0 +1,7 @@
+version: '2'
+services:
+  ledgereditor:
+    restart: always
+    image: "ledgereditor"
+    ports:
+     - "80:8888"

@@ -1,0 +1,72 @@
+<div>
+  <select id="ledgerreportselect" class="form-control" ng-model="selectedreport" ng-change="changeReport(selectedreport)">
+    <option value="balance">Balance</option>
+    <option value="register">Register</option>
+    <option value="budgetregister">Budget Register</option>
+    <option value="combinedregister">Combined Register</option>
+  </select>
+
+  <select id="ledgerreportaccountselect" class="form-control" ng-model="selectedaccounts" ng-change="changeAccounts(selectedaccounts)">
+    <option value="allaccounts">All Accounts</option>
+    <option value="expenses_">Expenses</option>
+    <option value="income_">Income</option>
+    <option value="incomeexpenses_">Income &amp; Expenses</option>
+    <option value="assets_">Assets</option>
+    <option value="assetssummary_">Assets Summary</option>
+    <option value="liabilities_">Liabilities</option>
+    <option value="assetsliabilities_">Assets &amp; Liabilities</option>
+    <option ng-repeat="acct in accountnames" value="_{{acct}}">{{acct}}</option>
+  </select>
+
+  <select id="ledgerreporthistoricalselect" class="form-control" ng-model="selectedhistorical" ng-change="changeHistorical(selectedhistorical)">
+    <option value="auto"></option>
+    <option value="nohistorical">Omit Historical</option>
+    <option value="includehistorical">Include Historical</option>
+  </select>
+
+  <select id="ledgerreporttimeperiodselect" class="form-control" ng-model="selectedtimeperiod" ng-change="changeTimePeriod(selectedtimeperiod)">
+    <option value="nogrouping">No Grouping</option>
+    <option value="daily">Daily</option>
+    <option value="weekly">Weekly</option>
+    <option value="monthly">Monthly</option>
+    <option value="quarterly">Quarterly</option>
+    <option value="yearly">Yearly</option>
+  </select>
+
+  <select id="ledgerreporttimeselect" class="form-control" ng-model="selectedtime" ng-change="changeTime(selectedtime)">
+    <option value="alltime">All Time</option>
+    <option value="thisyear">Year to Date</option>
+    <option value="today">Today</option>
+    <option value="thisweek">This Week</option>
+    <option value="past_7_days">Past 7 Days</option>
+    <option value="past_14_days">Past 14 Days</option>
+    <option value="thismonth">This Month</option>
+    <option value="lastmonth">Last Month</option>
+    <option value="past_1_months">Past 1 Month</option>
+    <option value="past_2_months">Past 2 Months</option>
+    <option value="past_3_months">Past 3 Months</option>
+    <option value="past_4_months">Past 4 Months</option>
+    <option value="past_6_months">Past 6 Months</option>
+    <option value="past_12_months">Past 12 Months</option>
+    <option value="lastyear">Last Year</option>
+    <option value="custom">Custom...</option>
+  </select>
+
+  <span ng-show="selectedtime == 'custom'" style="display: inline;">
+     <input type="text" class="form-control" placeholder="Start Date" ng-blur="changeTime(selectedtime)" style="display:inline; width: 120px; margin-top: 5px;" datepicker-append-to-body="true" uib-datepicker-popup="yyyy/MM/dd" ng-model="startdate" close-text="Close" is-open="startdateopened" />
+     <span class="input-group-btn" style="display: inline;">
+       <button type="button" style="display: inline;" class="btn btn-default" ng-click="startdateopened = true;"><i class="glyphicon glyphicon-calendar"></i></button>
+     </span>
+  </span>
+  <span ng-show="selectedtime == 'custom'" style="display: inline;">
+     <input type="text" class="form-control" placeholder="End Date" ng-blur="changeTime(selectedtime)" style="display:inline; width: 120px; margin-top: 5px;" datepicker-append-to-body="true" uib-datepicker-popup="yyyy/MM/dd" ng-model="enddate" close-text="Close" is-open="enddateopened" />
+     <span class="input-group-btn" style="display: inline;">
+       <button type="button" style="display: inline;" class="btn btn-default" ng-click="enddateopened = true;"><i class="glyphicon glyphicon-calendar"></i></button>
+     </span>
+  </span>
+
+  <br>
+  <div ui-grid="gridOptions" ui-grid-pinning ui-grid-auto-scroll ui-grid-resize-columns ui-grid-cellNav ui-grid-exporter ui-grid-selection class="grid"></div>
+
+
+</div>

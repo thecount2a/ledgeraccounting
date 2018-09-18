@@ -1,0 +1,14 @@
+<div ng-controller="mainController">
+
+    <button class="btn" style="position: absolute; top: 0px; right: 15px;" ng-click="openAccountManager();">Account Manager</button>
+    <uib-tabset active="activetab">
+        <uib-tab 
+            ng-repeat="t in tabs" 
+            heading="{{t.heading}}"
+            select="go(t.route)">
+        </uib-tab>
+    </uib-tabset>
+    <div ui-view></div>
+
+</div>
+

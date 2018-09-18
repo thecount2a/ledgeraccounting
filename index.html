@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <script src="aws-sdk.min.js"></script>
+    <script src="aws-cognito-sdk.min.js"></script>
+    <script src="amazon-cognito-identity.min.js"></script>
+    <link data-require="bootstrap-css@3.0.3" data-semver="3.0.3" rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-touch.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
+    <script data-require="jquery@2.1.3" data-semver="2.1.3" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <link data-require="ui-select@0.19.8" data-semver="0.19.8" rel="stylesheet" href="https://cdn.rawgit.com/angular-ui/ui-select/v0.19.8/dist/select.css" />
+    <script data-require="ui-select@0.19.8" data-semver="0.19.8" src="https://cdn.rawgit.com/angular-ui/ui-select/v0.19.8/dist/select.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.8.5/css/selectize.default.css">
+    <script src="csv.js"></script>
+    <script src="pdfmake.js"></script>
+    <script src="vfs_fonts.js"></script>
+    <!--link rel="stylesheet" type="text/css" href="ui-grid.css"/-->
+    <script src="https://cdn.rawgit.com/angular-ui/ui-grid.info/v4.6.1/release/4.6.1/ui-grid.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/angular-ui/ui-grid.info/v4.6.1/release/4.6.1/ui-grid.min.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="main.css"/>
+    <script src="moment.min.js"></script>
+    <!--script src="ui-grid.min.js"></script-->
+    <script src="auto-scroll.js"></script>
+    <script src="ledgerparser.js"></script>
+    <script src="sha256.min.js"></script>
+    <script src="nacl-util.min.js"></script>
+    <script src="nacl-fast.min.js"></script>
+    <script src="jwt-decode.min.js"></script>
+    <script src="naive_bayes.js"></script>
+    <script data-require="angular-ui-bootstrap@*" data-semver="2.5.0" src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.js"></script>
+    <script src="script.js"></script>
+    
+    <title>Ledger Accounting</title>
+  </head>
+
+<body ng-app="routedTabs">
+
+<div id="loadingOverlay">
+    <div id="floatingBarsG">
+        <div class="blockG" id="rotateG_01"></div>
+        <div class="blockG" id="rotateG_02"></div>
+        <div class="blockG" id="rotateG_03"></div>
+        <div class="blockG" id="rotateG_04"></div>
+        <div class="blockG" id="rotateG_05"></div>
+        <div class="blockG" id="rotateG_06"></div>
+        <div class="blockG" id="rotateG_07"></div>
+        <div class="blockG" id="rotateG_08"></div>
+    </div>
+</div>
+   <div ui-view></div>
+
+<script type="text/ng-template" id="login.html">
+    <form name="form" ng-submit="login()" role="form">
+      <div class="modal-header" style="position: relative; height: 70px">
+        <h4 style="display:inline; position: absolute; width: 300px;">{{ loginState == 'selectledger' ? "Please Select a Ledger" : "Please Login" }}</h4>
+        <span ng-show="loginState != 'selectledger'" style="display:inline; position: absolute; left: 350px;">
+          <div class="btn-group btn-radio" role="group"><button type="button" class="btn btn-default {{loginState=='login'?' active':''}}" ng-click="selectLogin('login');">Login</button><button type="button" class="btn btn-default {{loginState!='login'?' active':''}}" ng-click="selectLogin('register');">Register</button></div>
+        </span>
+      </div>
+      <div class="modal-body">
+        <div ng-show="loginState != 'selectledger'">
+          <div class="form-group">
+              <label for="username">Username</label>
+              <input type="text" name="username" id="username" class="form-control" ng-model="username" />
+          </div>
+          <div ng-show="loginState == 'register'" class="form-group">
+              <label for="email">Email</label>
+              <input type="text" name="email" id="email" class="form-control" ng-model="email" />
+          </div>
+          <div ng-show="loginState == 'register'" class="form-group">
+              <label for="cellphone">Cell Phone Number (optional)</label>
+              <input type="text" name="cellphone" id="cellphone" class="form-control" ng-model="cellphone" />
+          </div>
+          <div ng-show="loginState == 'verifycode'" class="form-group">
+              <label for="verifycode">Verification Code</label>
+              <input type="text" name="verifycode" id="verifycode" class="form-control" ng-model="verifycode" />
+          </div>
+          <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" name="password" id="password" class="form-control" ng-model="password" />
+          </div>
+          <div ng-show="loginState == 'register'" class="form-group">
+              <label for="repeatpassword">Repeat Password</label>
+              <input type="password" name="repeatpassword" id="repeatpassword" class="form-control" ng-model="repeatpassword" />
+          </div>
+        </div>
+        <div ng-show="loginState == 'selectledger'">
+            <div class="listitem listitemhover" ng-repeat="item in index.ledgers track by item.id" ng-click="selectLedger(item);"><span class="checkmark"><div class="checkmark_stem{{ item.id == activeitem ? '' : '_invisible'}}"></div><div class="checkmark_kick{{ item.id == activeitem ? '' : '_invisible'}}"></div></span><div class="listitemtext">{{item.name}}</div></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <img ng-if="dataLoading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+        <button type="button" ng-show="loginState == 'selectledger'" class="btn btn-primary" ng-click="createNewLedger()">Create New Ledger</button>
+        <button type="submit" ng-disabled="(loginState == 'register' && (repeatpassword == '' || email == '' || password != repeatpassword)) || (loginState == 'verifycode' && verifycode == '') || (loginState != 'selectledger' && (password == '' || username == '')) || (loginState == 'selectledger' && activeitem === null) || dataLoading" class="btn btn-primary">{{submitbuttontext}}</button>
+      </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="newaccount.html">
+      <div class="modal-header" style="height: 70px">
+        <h4>New Account</h4>
+      </div>
+      <div class="modal-body">
+          <div style="margin-bottom: 20px;margin-left: 15px;"><span style="display: inline-block; width: 120px;text-align: right;padding-right:20px;"><b>Type:</b></span><select class="form-control" ng-model="accounttype" style="width: 400px; display: inline-block;">
+            <option value="Expenses:" ng-if="expenseincome">Expense Account (name of expense category)</option>
+            <option value="Income:" ng-if="expenseincome">Income Account (name of income category)</option>
+            <option value="Assets:" ng-if="!expenseincome">Asset Account (such as bank account or cash account)</option>
+            <option value="Liabilities:" ng-if="!expenseincome">Liability Account (such as credit card or loan account)</option>
+          </select>
+          </div>
+          <div style="margin-left: 15px"><span style="display: inline-block; width: 120px;text-align: right;padding-right:20px;"><b>Name:</b></span><span style="display:inline-block;width: 100px;text-align: right;">{{accounttype}}</span><input type="text" ng-model="accountname" placeholder="{{(accounttype=='Assets:' || accounttype == 'Liabilities:') ? 'Bank Name:Account Name':(accounttype=='Expenses:'?'Bills:Electric':'Paycheck:My Employer')}}" class="form-control" style="width: 300px;margin-top:3px;display:inline-block;" /></div>
+          <div ng-show="!expenseincome" style="margin-left: 15px; margin-top: 20px;"><span style="display: inline-block; width: 120px;text-align: right;padding-right:20px;"><b>Initial Balance:</b></span><input type="text" ng-model="initialbalance" class="form-control" style="width: 400px;margin-top:3px;display:inline-block;" /></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success" ng-click="ok()" ng-disabled="accountname==''">Okay</button>
+        <button class="btn" ng-if="!expenseincome" ng-click="cancel()">Cancel</button>
+      </div>
+</script>
+<script type="text/ng-template" id="accountmanager.html">
+      <div class="modal-header" style="position: relative; height: 70px">
+        <h4 style="display:inline; position: absolute; width: 300px;">Account Manager</h4>
+        <span style="display:inline; position: absolute; left: 350px;">
+          <div class="btn-group btn-radio" role="group"><button type="button" class="btn btn-default {{tabState=='accounts'?' active':''}}" ng-click="tabState = 'accounts';">Accounts</button><button type="button" class="btn btn-default {{tabState=='transactions'?' active':''}}" ng-click="tabState = 'transactions';">Transactions</button></div>
+        </span>
+      </div>
+    <div class="modal-body">
+        <div class="account-manager">
+          <div ng-show="tabState == 'accounts'">
+            <div class="listitem" ng-repeat="item in accounts | orderBy:'name' track by item.name" style="position: relative;{{((item.importType == 'ofxConnect' && item.bankList) ? ' height: 340px':'')}}"><div class="listitemtext">{{item.name}}</div>
+              <form>
+                <select class="form-control acctselect" ng-model="item.importType" ng-change="changeImport(item)">
+                  <option value=""></option>
+                  <option value="ofxFile">Import OFX File</option>
+                  <option value="ofxConnect">OFX Direct Connect</option>
+                </select>
+                <input type="file" ng-if="item.importType=='ofxFile'" id="file{{item.idx}}" ng-model="item.ofxFile" custom-on-change="changeImportFile" class="btn btn-default acctfile" />
+                <div ng-if="(item.importType=='ofxConnect' && !item.ofxInfo)" class="acctofx">
+                    
+                    <input type="text" ng-model="item.ofxSearch" placeholder="Bank Name" class="form-control" style="width: 170px;margin-top:6px;margin-right:5px;display:inline;" /> <button class="btn btn-success" ng-click="searchOfx(item)" ng-disabled="(item.ofxSearch.length <= 0)">Search</button>
+                </div>
+                <div ng-if="(item.importType=='ofxConnect' && item.ofxInfo)" class="acctofx">
+                    
+                    <span style="width:180px;margin-top:0px;padding-top:15px;font-size:8pt;height:30px;margin-right:5px;display:inline-block;overflow:hidden;">{{item.ofxInfoDescription}}</span><button class="btn btn-success" style="margin-top:0px;" ng-click="item.ofxInfo = null;">Reset</button>
+                </div>
+                <div ng-if="(item.importType=='ofxConnect' && !item.ofxInfo && item.bankList)" style="position: absolute; display: inline; top: 60px; left: 510px;">
+                    <select class="form-control" ng-model="item.bankSelection" style="display:inline; margin-bottom: 5px;width: 260px;">
+                      <option value="{{bank.id}}" ng-repeat="bank in item.bankList track by bank.id">{{bank.name}}</option>
+                    </select><br/>
+                    <span style="width: 85px; margin-left: 5px;display: inline-block;">OFX Version:</span><input type="text" style="display: inline; width: 170px;" ng-model="item.ofxVersion" class="form-control" ng-init="item.ofxVersion='102';" /><br/> 
+                    <span style="width: 85px; margin-left: 5px;display: inline-block; margin-top: 5px;">Username:</span><input type="text" style="display: inline; width: 170px;" ng-model="item.ofxUsername" class="form-control" /><br/> 
+                    <span style="width: 85px; margin-left: 5px; display: inline-block; margin-top: 5px;">Password:</span><input type="password" style="display: inline; width: 170px;" ng-model="item.ofxPassword" class="form-control" /><br/>
+                    <button class="btn btn-success" ng-click="getOfxAccounts(item)" style="width: 260px" ng-disabled="((!item.ofxPassword || item.ofxPassword.length <= 0) || (!item.ofxUsername || item.ofxUsername.length <= 0) || !item.bankSelection)">Get List of Accounts</button><br/>
+                    <select class="form-control" ng-model="item.bankAccountSelection" style="display:inline; margin-bottom: 5px; margin-top: 8px;width: 260px;">
+                      <option value="{{acct.local_id}}" ng-repeat="acct in item.accountList track by acct.local_id">{{acct.institution.description}} - {{acct.description}}</option>
+                    </select><br/>
+                    <button class="btn btn-success" ng-click="saveOfxConnect(item)" ng-disabled="!item.bankAccountSelection" style="width: 260px">Save OFX Connect Configuration</button>
+                </div>
+                <span class="acctstatus" ng-if="(!item.loading && (item.importType=='ofxConnect' && item.ofxInfo && numTransactions('all', item.name, -1) < 0))"><button class="btn btn-success" ng-click="downloadOfx(item);" style="margin-top:-4px;">Download</button></span>
+                <img ng-if="item.loading" style="display:inline;top: 23px; left: 810px; position: absolute;" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                <span class="acctstatus{{item.status=='error'?' statusred':(item.status=='success'?' statusgreen':'')}}" ng-if="(!item.loading && (numTransactions('all', item.name, -1) >= 0))">{{numTransactions('new', item.name, -1)}} new / {{numTransactions('duplicate', item.name, -1)}} dup</span>
+              </form>
+            </div>
+          </div>
+          <div ng-show="tabState == 'transactions'">
+            <div ng-if="numTransactions('all', -1, -1) > 0">
+              <h2>Existing Duplicate Transactions</h2>
+              <div ng-repeat="item in accounts track by item.name">
+                  <div ng-if="item.nTxnIndex">
+                    <h3>Account: {{item.name}}</h3>
+                    <table width="98%" style="border-collapse: collapse; border: 1px solid black;" border="1" cellpadding="5">
+                      <tr><th width="50%">Imported Transaction</th><th width="50%">Existing Duplicate Transaction</th></tr>
+                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicate: '!!' }">
+                          <td><pre style="font-size: 7pt">{{ objects2ledger([item.transactions[txn.ind]], false) }}</pre></td>
+                          <td><pre style="font-size: 7pt">{{ objects2ledger([ledgerSet[item.eTxnIndex[txn.duplicate].list][item.eTxnIndex[txn.duplicate].ind]], false) }}</pre></td>
+                        </tr>
+                    </table>
+                  </div>
+              </div>
+              <h2>New Transactions</h2>
+              <div ng-repeat="item in accounts track by item.name">
+                  <div ng-if="item.nTxnIndex">
+                    <h3>Account: {{item.name}}</h3>
+                    <table width="75%" style="border-collapse: collapse; border: 1px solid black;" border="1" cellpadding="5">
+                      <tr><th width="100%">Imported Transaction</th></tr>
+                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicate: '!' }">
+                          <td><pre style="font-size: 10pt">{{ objects2ledger([item.transactions[txn.ind]], false) }}</pre></td>
+                        </tr>
+                    </table>
+                  </div>
+              </div>
+            </div>
+            <div ng-if="numTransactions('all', -1, -1) <= 0">
+                <h3>No Pending Imported Transactions</h3>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" ng-click="finishImport()" style="margin-right: 350px;" ng-disabled="(numTransactions('new', -1, -1) <= 0)">Finish Import ({{numTransactions('new', -1, 0)}} new / {{numTransactions('duplicate', -1, 0)}} duplicate)</button>
+      <button class="btn" ng-click="newAccount()" style="margin-right: 50px;">New Account</button>
+      <button class="btn btn-success" ng-click="ok()">Okay</button>
+      <button class="btn" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+
+</body>
+
+
+</html>
+

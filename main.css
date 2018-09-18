@@ -1,0 +1,508 @@
+.grid {
+    position:absolute;top:85px;left:0;right:0;bottom:0;
+}
+
+
+.ui-grid-cell {
+  overflow: visible;
+  z-index: 99999;
+}
+
+.ui-grid-cell, ui-select-wrap {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.my-modal-window .modal-dialog {
+  width: 1000px;
+}
+
+.acctselect {
+   display: inline;
+   position: absolute;
+   top: 13px; 
+   left: 330px;
+   width: 170px;
+}
+
+.acctfile {
+   display: inline;
+   position: absolute;
+   top: 7px; 
+   left: 510px;
+   width: 250px;
+}
+
+.acctstatus {
+   display: inline;
+   position: absolute;
+   top: 20px; 
+   left: 775px;
+   width: 140px;
+}
+
+.acctofx {
+   display: inline;
+   position: absolute;
+   top: 7px; 
+   left: 510px;
+   width: 250px;
+}
+
+.statusred {
+  color: red;
+  font-weight: bold;
+}
+
+.statusgreen {
+  color: green;
+  font-weight: bold;
+}
+
+.listitem {
+   background-color: #d6dee0;
+   padding: 20px;
+   margin: 5px;
+   border-radius:10px;
+   border: 2px solid #d6dee0;
+}
+
+.listitemtext {
+    display:inline-block;
+    padding-left: 20px;
+}
+
+.listitemhover:hover {
+  background-color: white;
+}
+
+.listitemhover:active {
+  background-color: grey;
+}
+
+
+.checkmark {
+    display:inline-block;
+    width: 15px;
+    height:15px;
+    -ms-transform: rotate(45deg); /* IE 9 */
+    -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+    transform: rotate(45deg);
+}
+
+.checkmark_stem {
+    position: absolute;
+    width:6px;
+    height:18px;
+    background-color:#888;
+    left:6px;
+    top:0px;
+}
+
+.checkmark_kick {
+    position: absolute;
+    width:7px;
+    height:6px;
+    background-color:#888;
+    left:0px;
+    top:12px;
+}
+
+.checkmark_stem_invisible {
+    position: absolute;
+    width:6px;
+    height:18px;
+    background-color:transparent;
+    left:6px;
+    top:0px;
+}
+
+.checkmark_kick_invisible {
+    position: absolute;
+    width:7px;
+    height:6px;
+    background-color:transparent;
+    left:0px;
+    top:12px;
+}
+
+.account-manager {
+  width: 955px;
+  height: 400px;
+  overflow: scroll;
+}
+
+.modal-editor {
+  width: 955px;
+  height: 400px;
+  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+}
+
+  .nav-tabs > li > div {
+    margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .nav-tabs > li > div:hover {
+    border-color: #eee #eee #ddd;
+  }
+
+  .nav-tabs > li.active > div, .nav-tabs > li.active > div:hover {
+    color: #444;
+    cursor: default;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+  }
+
+  .nav > li > div {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+  }
+
+  .nav > li > div:hover {
+    background-color: #eee;
+  }
+
+  .uib-tab > div {
+    color: #337ab7;
+    cursor: pointer;
+  }
+
+  .nav-tabs > li.disabled > div { 
+    color: #999; 
+  }
+
+  .nav-tabs>li.disabled>div:hover, .nav-tabs>li.disabled>div:focus {
+    color: #999;
+    text-decoration: none;
+    background-color: transparent;
+    cursor: not-allowed;
+  }
+
+  form.tab-form-demo .tab-pane {
+    margin: 20px 20px;
+  }
+
+.mybtn {
+    line-height: 0px;
+    min-height: 20px;
+}
+#ledgereditselect {
+    width: 250px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgereditaccountsselect {
+    width: 300px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreportselect {
+    width: 180px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreporttimeselect {
+    width: 150px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreporthistoricalselect {
+    width: 160px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreportaccountselect {
+    width: 300px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreporttimeperiodselect {
+    width: 150px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreportbudgetperiodselect {
+    width: 200px;
+    display: inline;
+    margin-top: 5px;
+}
+#ledgerreportbudgetsavedselect {
+    width: 200px;
+    display: inline;
+    margin-top: 5px;
+}
+#savedbudgetname {
+    width: 200px;
+    display: inline;
+    margin-top: 5px;
+}
+.btn {
+    margin-top: 5px;
+}
+.custom-top {
+   border-top: 1px solid black;
+}
+.custom-bottom {
+   border-bottom: 1px solid black;
+}
+.custom-right {
+   border-right: 1px solid black;
+}
+.custom-left {
+   border-left: 1px solid black;
+}
+.custom-right-align {
+   text-align: right;
+}
+.custom-center-align {
+   text-align: center;
+}
+.custom-red {
+    color: red;
+}
+.custom-blue {
+    color: blue;
+}
+
+.custom-bgyellow {
+    background-color: #fdf6bf;
+}
+
+.blockG{
+    position:absolute;
+    background-color:rgb(255,255,255);
+    width:10px;
+    height:23px;
+    border-radius:8px 8px 0 0;
+        -o-border-radius:8px 8px 0 0;
+        -ms-border-radius:8px 8px 0 0;
+        -webkit-border-radius:8px 8px 0 0;
+        -moz-border-radius:8px 8px 0 0;
+    transform:scale(0.4);
+        -o-transform:scale(0.4);
+        -ms-transform:scale(0.4);
+        -webkit-transform:scale(0.4);
+        -moz-transform:scale(0.4);
+    animation-name:fadeG;
+        -o-animation-name:fadeG;
+        -ms-animation-name:fadeG;
+        -webkit-animation-name:fadeG;
+        -moz-animation-name:fadeG;
+    animation-duration:1.2s;
+        -o-animation-duration:1.2s;
+        -ms-animation-duration:1.2s;
+        -webkit-animation-duration:1.2s;
+        -moz-animation-duration:1.2s;
+    animation-iteration-count:infinite;
+        -o-animation-iteration-count:infinite;
+        -ms-animation-iteration-count:infinite;
+        -webkit-animation-iteration-count:infinite;
+        -moz-animation-iteration-count:infinite;
+    animation-direction:normal;
+        -o-animation-direction:normal;
+        -ms-animation-direction:normal;
+        -webkit-animation-direction:normal;
+        -moz-animation-direction:normal;
+}
+
+#rotateG_01{
+    left:0;
+    top:27px;
+    animation-delay:0.45s;
+        -o-animation-delay:0.45s;
+        -ms-animation-delay:0.45s;
+        -webkit-animation-delay:0.45s;
+        -moz-animation-delay:0.45s;
+    transform:rotate(-90deg);
+        -o-transform:rotate(-90deg);
+        -ms-transform:rotate(-90deg);
+        -webkit-transform:rotate(-90deg);
+        -moz-transform:rotate(-90deg);
+}
+
+#rotateG_02{
+    left:8px;
+    top:10px;
+    animation-delay:0.6s;
+        -o-animation-delay:0.6s;
+        -ms-animation-delay:0.6s;
+        -webkit-animation-delay:0.6s;
+        -moz-animation-delay:0.6s;
+    transform:rotate(-45deg);
+        -o-transform:rotate(-45deg);
+        -ms-transform:rotate(-45deg);
+        -webkit-transform:rotate(-45deg);
+        -moz-transform:rotate(-45deg);
+}
+
+#rotateG_03{
+    left:25px;
+    top:3px;
+    animation-delay:0.75s;
+        -o-animation-delay:0.75s;
+        -ms-animation-delay:0.75s;
+        -webkit-animation-delay:0.75s;
+        -moz-animation-delay:0.75s;
+    transform:rotate(0deg);
+        -o-transform:rotate(0deg);
+        -ms-transform:rotate(0deg);
+        -webkit-transform:rotate(0deg);
+        -moz-transform:rotate(0deg);
+}
+
+#rotateG_04{
+    right:8px;
+    top:10px;
+    animation-delay:0.9s;
+        -o-animation-delay:0.9s;
+        -ms-animation-delay:0.9s;
+        -webkit-animation-delay:0.9s;
+        -moz-animation-delay:0.9s;
+    transform:rotate(45deg);
+        -o-transform:rotate(45deg);
+        -ms-transform:rotate(45deg);
+        -webkit-transform:rotate(45deg);
+        -moz-transform:rotate(45deg);
+}
+
+#rotateG_05{
+    right:0;
+    top:27px;
+    animation-delay:1.05s;
+        -o-animation-delay:1.05s;
+        -ms-animation-delay:1.05s;
+        -webkit-animation-delay:1.05s;
+        -moz-animation-delay:1.05s;
+    transform:rotate(90deg);
+        -o-transform:rotate(90deg);
+        -ms-transform:rotate(90deg);
+        -webkit-transform:rotate(90deg);
+        -moz-transform:rotate(90deg);
+}
+
+#rotateG_06{
+    right:8px;
+    bottom:7px;
+    animation-delay:1.2s;
+        -o-animation-delay:1.2s;
+        -ms-animation-delay:1.2s;
+        -webkit-animation-delay:1.2s;
+        -moz-animation-delay:1.2s;
+    transform:rotate(135deg);
+        -o-transform:rotate(135deg);
+        -ms-transform:rotate(135deg);
+        -webkit-transform:rotate(135deg);
+        -moz-transform:rotate(135deg);
+}
+
+#rotateG_07{
+    bottom:0;
+    left:25px;
+    animation-delay:1.35s;
+        -o-animation-delay:1.35s;
+        -ms-animation-delay:1.35s;
+        -webkit-animation-delay:1.35s;
+        -moz-animation-delay:1.35s;
+    transform:rotate(180deg);
+        -o-transform:rotate(180deg);
+        -ms-transform:rotate(180deg);
+        -webkit-transform:rotate(180deg);
+        -moz-transform:rotate(180deg);
+}
+
+#rotateG_08{
+    left:8px;
+    bottom:7px;
+    animation-delay:1.5s;
+        -o-animation-delay:1.5s;
+        -ms-animation-delay:1.5s;
+        -webkit-animation-delay:1.5s;
+        -moz-animation-delay:1.5s;
+    transform:rotate(-135deg);
+        -o-transform:rotate(-135deg);
+        -ms-transform:rotate(-135deg);
+        -webkit-transform:rotate(-135deg);
+        -moz-transform:rotate(-135deg);
+}
+
+
+
+@keyframes fadeG{
+    0%{
+        background-color:rgb(0,0,0);
+    }
+
+    100%{
+        background-color:rgb(255,255,255);
+    }
+}
+
+@-o-keyframes fadeG{
+    0%{
+        background-color:rgb(0,0,0);
+    }
+
+    100%{
+        background-color:rgb(255,255,255);
+    }
+}
+
+@-ms-keyframes fadeG{
+    0%{
+        background-color:rgb(0,0,0);
+    }
+
+    100%{
+        background-color:rgb(255,255,255);
+    }
+}
+
+@-webkit-keyframes fadeG{
+    0%{
+        background-color:rgb(0,0,0);
+    }
+
+    100%{
+        background-color:rgb(255,255,255);
+    }
+}
+
+@-moz-keyframes fadeG{
+    0%{
+        background-color:rgb(0,0,0);
+    }
+
+    100%{
+        background-color:rgb(255,255,255);
+    }
+}
+#floatingBarsG{
+    position:relative;
+    display:block;
+    width:60px;
+    height:75px;
+    margin:0 auto;
+    top: 300px;
+}
+
+#loadingOverlay {
+    background: #555;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    opacity: 0.5;
+    display: none;
+    z-index: 2000;
+}
+
