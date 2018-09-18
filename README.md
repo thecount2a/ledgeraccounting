@@ -48,3 +48,32 @@ Huge credit goes to Simon Michael and his team at hledger. Ledgeraccounting is b
 - Improve UI look-and-feel.
 - Implement in-GUI documentation or in-product tour functionality.
 - Document how to deploy the entire service from scratch, just in case somebody wants to setup a personal instance of this service. Currently the docker approach can be deployed without too much extra work (the user must compile version 1.9.1 of hledger and must setup Amazon Cognito and Amazon S3 -- or write me an email and ask politely to use my Amazon Cognito user pool and Amazon S3 buckets). Unfortunately, the Amazon Lambda approach requires quite a few more manual steps to setup.
+
+### Screenshots:
+
+#### Current Account Balances Report
+![Current Account Balances Report](Screenshots/CurrentAccountBalances.png?raw=true)
+
+#### Ledger Transaction Editor
+![Ledger Transaction Editor](Screenshots/LedgerEditor.png?raw=true)
+
+#### Categorizing a Transaction (assigning it to an expense account)
+![Categorizing a Transaction](Screenshots/CategorizingTransaction.png?raw=true)
+
+#### Account Manager (for managing OFX/QFX import for Asset and Liability accounts)
+![Account Manager](Screenshots/AccountManager.png?raw=true)
+
+#### Budget Manager / Budget Report Page
+![Budget Manager](Screenshots/BudgetManager.png?raw=true)
+
+#### Income and Expenses by Month Report
+![Income and Expenses by Month Report](Screenshots/IncomeAndExpensesByMonth.png?raw=true)
+
+#### Asset Summary by Month Report
+![Asset Summary by Month Report](Screenshots/AssetSummaryByMonth.png?raw=true)
+
+#### Checking Account Register Report
+![Checking Account Register Report](Screenshots/CheckingAccountRegisterReport.png?raw=true)
+
+
+
