@@ -58,6 +58,9 @@ Huge credit goes to Simon Michael and his team at hledger. Ledgeraccounting is b
 #### Ledger Transaction Editor
 ![Ledger Transaction Editor](Screenshots/LedgerEditor.png?raw=true)
 
+#### Ledger Transaction Editor with Open Split
+![Ledger Transaction Editor with Open Split](Screenshots/LedgerEditorOpenSplit.png?raw=true)
+
 #### Categorizing a Transaction (assigning it to an expense account)
 ![Categorizing a Transaction](Screenshots/CategorizingTransaction.png?raw=true)
 
