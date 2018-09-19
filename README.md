@@ -3,14 +3,14 @@
 
 ### Features:
 
-- Offers full double-entry accounting ledger functionality through a single-page web app. Transactions can have dates, check numbers, payees, memos, and transaction splits. Transaction splits can have accounts, amounts, and memos associated with them. Memos may be enabled via the button in the upper-right corner of the transaction editor grid. New transactions or transaction splits can be created by double-clicking a blank area within the editor grid.
-- Offers web UI for generating balance reports (account summary) and register reports (transaction-level detail).  All reports use hledger (http://hledger.org/) behind the scenes and then translate the resulting reports to the web UI for browsing by the user.
-- Supports double-click linking of any dollar amount in a balance (account summary) report to a register (transaction-level) report that shows the underlying transactions that add up to the summary balance.
+- Offers full **double-entry accounting** ledger functionality through a single-page web app. Transactions can have dates, check numbers, payees, memos, and transaction splits. Transaction splits can have accounts, amounts, and memos associated with them. Memos may be enabled via the button in the upper-right corner of the transaction editor grid. New transactions or transaction splits can be created by double-clicking a blank area within the editor grid.
+- Offers web UI for generating **balance reports** (account summary), **register reports** (transaction-level detail), and **budget reports** (using zero-sum budgeting approach, a.k.a. **Envelope budgeting**).  All reports use **hledger** (http://hledger.org/) behind the scenes and then translate the resulting reports to the web UI for browsing by the user.
+- Supports double-click linking of any summary amount in a balance report (account summary) to a register report (transaction-level) that shows the underlying transactions that add up to the summary balance. For example, if you are looking at an Income and Expenses monthly report and see that during a particular month, the amount of money spent on food was higher than you expected, you can easily double-click on the amount to see a breakdown of all the transactions (payees and amounts) associated with those transactions and see why the amount was higher than you would expect.
 - Export of reports in PDF or CSV formats from the web UI.
-- Offers OFX/QFX import from file or using OFX direct connect to your banking institution (requires manual setup of OFX direct connect with most banks, also commonly known as "Quicken Direct Connect" or "Quickbooks Direct Connect").
+- Offers **OFX/QFX import** from file or using **OFX direct connect** to your banking institution (requires manual setup of OFX direct connect with most banks, also commonly known as "Quicken Direct Connect" or "Quickbooks Direct Connect").
 - Implements a full, personal finance budgeting system based upon zero-sum budgeting (also known as envelope budgeting). Dollar amounts may be "transferred" between envelopes using the web UI. Income automatically shows up in income "envelopes" and may then be distributed to expense "envelopes". Current balance of each envelope can be accessed from the web GUI at any time. Double-clicking on any balance column in a budget report links to a transaction-level report that shows the underlying transactions.
 - Most report settings can be saved by saving the URL of the report either using a browser bookmark or by copy-and-pasting the URL.
-- All ledger and OFX direct connect data is stored encrypted at rest (but not in transit).
+- All ledger and OFX direct connect data is stored **encrypted at rest** (but not in transit) using the user's password as a key.
 - A beta server is provided at https://www.ledgeraccounting.org/ but users must keep in mind that the complexity of their password will help protect the security of their data, in the long run. Also, this means that losing a password means that the ledger data is forever unrecoverable. Please regularly backup your ledger files offline, in a secure location. Even the server administrators cannot restore a lost ledger file, due to a forgotten password! Don't even ask! If you forget your password, just create a new account and import your last saved backup of your ledger file and write me an email, asking me to delete your old account data from the server storage area on Amazon.
 
 ### Credits
@@ -44,6 +44,7 @@ Huge credit goes to Simon Michael and his team at hledger. Ledgeraccounting is b
 - Auto-detect when the user is importing their first OFX file and offer to add an "auto-balancing" transaction instead of complaining that the imported transactions don't add up to the account balance encoded within the OFX file.
 - Implement double-click linking between individual transactions in a register report and the actual editable ledger entry.
 - Better implement multi-currency/multi-commodity support. Currently, the underlying hledger program fully supports multi-currency accounting and reporting but ledgeraccounting may have lost some of this capability since I only use it for reporting on US dollars in my testing. Also, the budgeting UI will automatically add a dollar sign to any amount but the currency symbol ought to be user-configurable.
+- Implement 2-factor authentication (TOTP) offered by Amazon Cognito.
 - Add graph-based reporting.
 - Improve UI look-and-feel.
 - Implement in-GUI documentation or in-product tour functionality.
