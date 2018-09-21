@@ -3,6 +3,7 @@
 
 ### Features:
 
+- Beta website is hosted at: https://www.ledgeraccounting.org/
 - Offers full **double-entry accounting** ledger functionality through a single-page web app. Transactions can have dates, check numbers, payees, memos, and transaction splits. Transaction splits can have accounts, amounts, and memos associated with them. Memos may be enabled via the button in the upper-right corner of the transaction editor grid. New transactions or transaction splits can be created by double-clicking a blank area within the editor grid.
 - Offers web UI for generating **balance reports** (account summary), **register reports** (transaction-level detail), and **budget reports** (using zero-sum budgeting approach, a.k.a. **Envelope budgeting**).  All reports use **hledger** (http://hledger.org/) behind the scenes and then translate the resulting reports to the web UI for browsing by the user.
 - Supports double-click linking of any summary amount in a balance report (account summary) to a register report (transaction-level) that shows the underlying transactions that add up to the summary balance. For example, if you are looking at an Income and Expenses monthly report and see that during a particular month, the amount of money spent on food was higher than you expected, you can easily double-click on the amount to see a breakdown of all the transactions (payees and amounts) associated with those transactions and see why the amount was higher than you would expect.
