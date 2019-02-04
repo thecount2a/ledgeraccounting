@@ -1163,7 +1163,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
   }
 
   $scope.totalMatch = {};
-  $scope.savedProps = {'importType':true, 'ofxInfo':true, 'ofxInfoDescription':true};
+  $scope.savedProps = {'importType':true, 'endofacct': true, 'ofxInfo':true, 'ofxInfoDescription':true};
 
   $scope.newlyAddedAccounts = {};
 
@@ -1680,7 +1680,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
             item.nTxnIndex = null;
             item.eTxnIndex = null;
             item.transactions = null;
-            item.ofxaccounts = null;
+            item.ofxaccount = null;
         }
       }
       else
@@ -1693,107 +1693,146 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
   }
 
   $scope.processOfx = function(item) {
-    if (item.ofxaccounts)
+    if (item.ofxaccount)
     {
-      if (item.ofxaccounts.length == 1)
+      var transactions = [];
+      for (var i = 0; i < item.ofxaccount.statement.transactions.length; i++)
       {
-        var transactions = [];
-        for (var i = 0; i < item.ofxaccounts[0].statement.transactions.length; i++)
+        var txn = {};
+        var posting1 = {};
+        var posting2 = {};
+        txn.date = item.ofxaccount.statement.transactions[i].date;
+        txn.dayIndex = getDayIndex(item.ofxaccount.statement.transactions[i].date);
+        posting1.account = item.name;
+        posting1.blockcomments = ["date:"+txn.date];
+        posting1.dayIndex = txn.dayIndex;
+        posting1.amount = item.ofxaccount.statement.transactions[i].amount.replace('-', '');
+        posting2.amount = item.ofxaccount.statement.transactions[i].amount.replace('-', '');
+        if (item.ofxaccount.statement.currency.toLowerCase() == "usd")
         {
-          var txn = {};
-          var posting1 = {};
-          var posting2 = {};
-          txn.date = item.ofxaccounts[0].statement.transactions[i].date;
-          txn.dayIndex = getDayIndex(item.ofxaccounts[0].statement.transactions[i].date);
-          posting1.account = item.name;
-          posting1.blockcomments = ["date:"+txn.date];
-          posting1.dayIndex = txn.dayIndex;
-          posting1.amount = item.ofxaccounts[0].statement.transactions[i].amount.replace('-', '');
-          posting2.amount = item.ofxaccounts[0].statement.transactions[i].amount.replace('-', '');
-          if (item.ofxaccounts[0].statement.currency.toLowerCase() == "usd")
-          {
-            posting1.amount = changeToAmericanCurrency(posting1.amount);
-            posting2.amount = changeToAmericanCurrency(posting2.amount);
-          }
-          if (item.ofxaccounts[0].statement.transactions[i].amount.indexOf('-') >= 0)
-          {
-            posting1.amount = invertAmount(posting1.amount);
-          }
-          else
-          {
-            posting2.amount = invertAmount(posting2.amount);
-          }
-          txn.payee = item.ofxaccounts[0].statement.transactions[i].payee;
-          txn.status = "*";
-          if (item.ofxaccounts[0].statement.transactions[i].checknum)
-          {
-            txn.code = item.ofxaccounts[0].statement.transactions[i].checknum;
-          }
-          if (item.ofxaccounts[0].statement.transactions[i].memo)
-          {
-            txn.comment = item.ofxaccounts[0].statement.transactions[i].memo;
-          }
-          var txnid = item.ofxaccounts[0].statement.transactions[i].id;
-          if (item.ofxaccounts[0].account_id)
-          {
-            txnid = txnid.replace(item.ofxaccounts[0].account_id, "");
-          }
-          if (item.ofxaccounts[0].routing_number)
-          {
-            txnid = txnid.replace(item.ofxaccounts[0].routing_number, "");
-          }
-          posting1.blockcomments.push("id:"+nacl.util.encodeBase64(nacl.util.decodeUTF8(txnid)));
-          // Categorize
-          var lookup = $scope.classifyTransformPayee(txn.payee, posting1.amount);
-          if ($scope.totalMatch[lookup + "____" + posting1.account] != undefined && $scope.totalMatch[lookup].length == 1)
-          {
-              posting2.account = $scope.totalMatch[lookup + "____" + posting1.account][0];
-          }
-          else if ($scope.totalMatch[lookup] != undefined && $scope.totalMatch[lookup].length == 1)
-          {
-              posting2.account = $scope.totalMatch[lookup][0];
-          }
-          else
-          {
-              posting2.account = $scope.classifier.categorize(lookup);
-              if (!posting2.account)
-              {
-                  if (posting2.amount.indexOf('-') >= 0)
-                  {
-                      posting2.account = "Income:Misc";
-                  }
-                  else
-                  {
-                      posting2.account = "Expenses:Misc";
-                  }
-              }
-          }
-          txn.postings=[posting1, posting2];
-          transactions.push(txn);
+          posting1.amount = changeToAmericanCurrency(posting1.amount);
+          posting2.amount = changeToAmericanCurrency(posting2.amount);
         }
-        item.transactions = transactions;
-        $scope.updateTransactions(item);
+        if (item.ofxaccount.statement.transactions[i].amount.indexOf('-') >= 0)
+        {
+          posting1.amount = invertAmount(posting1.amount);
+        }
+        else
+        {
+          posting2.amount = invertAmount(posting2.amount);
+        }
+        txn.payee = item.ofxaccount.statement.transactions[i].payee;
+        txn.status = "*";
+        if (item.ofxaccount.statement.transactions[i].checknum)
+        {
+          txn.code = item.ofxaccount.statement.transactions[i].checknum;
+        }
+        if (item.ofxaccount.statement.transactions[i].memo)
+        {
+          txn.comment = item.ofxaccount.statement.transactions[i].memo;
+        }
+        var txnid = item.ofxaccount.statement.transactions[i].id;
+        if (item.ofxaccount.account_id)
+        {
+          txnid = txnid.replace(item.ofxaccount.account_id, "");
+        }
+        if (item.ofxaccount.routing_number)
+        {
+          txnid = txnid.replace(item.ofxaccount.routing_number, "");
+        }
+        posting1.blockcomments.push("id:"+nacl.util.encodeBase64(nacl.util.decodeUTF8(txnid)));
+        // Categorize
+        var lookup = $scope.classifyTransformPayee(txn.payee, posting1.amount);
+        if ($scope.totalMatch[lookup + "____" + posting1.account] != undefined && $scope.totalMatch[lookup].length == 1)
+        {
+            posting2.account = $scope.totalMatch[lookup + "____" + posting1.account][0];
+        }
+        else if ($scope.totalMatch[lookup] != undefined && $scope.totalMatch[lookup].length == 1)
+        {
+            posting2.account = $scope.totalMatch[lookup][0];
+        }
+        else
+        {
+            posting2.account = $scope.classifier.categorize(lookup);
+            if (!posting2.account)
+            {
+                if (posting2.amount.indexOf('-') >= 0)
+                {
+                    posting2.account = "Income:Misc";
+                }
+                else
+                {
+                    posting2.account = "Expenses:Misc";
+                }
+            }
+        }
+        txn.postings=[posting1, posting2];
+        transactions.push(txn);
       }
-      else
-      {
-        alert("OFX Import file must contain transactions for only one account.  In the future this limitation may be removed.");
-      }  
+      item.transactions = transactions;
+      $scope.updateTransactions(item);
     }
   }
 
-  $scope.changeImport = function(item) {
-    if ((item.importType == "ofxFile" || item.importType == "ofxConnect") && item.contents)
+  $scope.changeImport = function(item, contents_list) {
+    if ((item.importType == "ofxFile" || item.importType == "ofxConnect") && contents_list.length > 0)
     {
-       item.loading = true;
-       $http.post($rootScope.apihost+"/", {"query": "parseofx", "contents": item.contents, "creds": $rootScope.creds})
-           .success(function(data) {
-               item.loading = false;
-               item.ofxaccounts = data.ofxaccounts;
-               $scope.processOfx(item);
-       }).error(function(data) {
-         item.loading = false;
-       });
-           
+      item.loading = true;
+      item.loaded = 0;
+      for (var i = 0; i < contents_list.length; i++)
+      {
+        $http.post($rootScope.apihost+"/", {"query": "parseofx", "contents": contents_list[i], "creds": $rootScope.creds})
+            .success(function(data) {
+                item.loaded++;
+                var notfound = [];
+                for (var k = 0; k < data.ofxaccounts.length; k++)
+                {
+                    var found = false;
+                    for (var j = 0; j < $scope.accounts.length; j++)
+                    {
+                        if ($scope.accounts[j].importType == "ofxFile" && $scope.accounts[j].endofacct && data.ofxaccounts[k].account_id.endsWith($scope.accounts[j].endofacct))
+                        {
+                            $scope.accounts[j].ofxaccount = data.ofxaccounts[k];
+                            $scope.processOfx($scope.accounts[j]);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (data.ofxaccounts.length == 1)
+                        {
+                            if (item.endofacct && !data.ofxaccounts[k].account_id.endsWith(item.endofacct))
+                            {
+                                alert("Cannot find account matching account number "+data.ofxaccounts[k].account_id+" (from imported file) and another account number already defined for this account entry");
+                            }
+                            else
+                            {
+                                // Set end of acct to last 5 of this account number
+                                item.endofacct = data.ofxaccounts[k].account_id.slice(-5);
+                                item.ofxaccount = data.ofxaccounts[k];
+                                $scope.processOfx(item);
+                            }
+                        }
+                        else
+                        {
+                            notfound.push(data.ofxaccounts[k].account_id.slice(-5));
+                        }
+                    }
+                }
+                if (notfound.length > 0)
+                {
+                    alert("Could not find accounts with the following last 5 digits of account numbers. Please specify these account(s): "+notfound.join(", "));
+                }
+                
+                if (item.loaded == contents_list.length)
+                {
+                   item.loading = false;
+                }
+        }).error(function(data) {
+          item.loading = false;
+        });
+      }
     }
     else
     {
@@ -1808,20 +1847,31 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     }
   };
 
+  $scope.loadAllFiles = function(ev, item, idx, arr) {
+    var reader = new FileReader();  
+    reader.onload = function(evt) {
+      arr.push(evt.target.result);
+      if (ev.target.files.length > idx + 1)
+      {
+        $scope.loadAllFiles(ev, item, idx + 1, arr);
+      }
+      else
+      {
+        $scope.changeImport(item, arr);
+        $scope.$apply();
+      }
+    };
+    reader.readAsText(ev.target.files[idx]);
+  };
+
   $scope.changeImportFile = function(ev) {
     var thisElementId = ev.target.getAttribute('id');
     for (var i = 0; i < $scope.accounts.length; i++)
     {
         if ($scope.accounts[i].domid == thisElementId)
         {
-          var reader = new FileReader();  
-          reader.onload = function(evt) {
-            //alert(evt.target.result);
-            $scope.accounts[i].contents = evt.target.result;
-            $scope.changeImport($scope.accounts[i]);
-            $scope.$apply();
-          };
-          reader.readAsText(ev.target.files[0]);
+          $scope.array_to_fill = [];
+          $scope.loadAllFiles(ev, $scope.accounts[i], 0, $scope.array_to_fill);
           break;
         }
     }
@@ -1842,15 +1892,15 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
                     numTxns++;
                 }
             }
-            if (numTxns > 0 && $scope.accounts[i].ofxaccounts && $scope.accounts[i].ofxaccounts[0].statement.balance && $scope.accounts[i].ofxaccounts[0].statement.balance_date)
+            if (numTxns > 0 && $scope.accounts[i].ofxaccount && $scope.accounts[i].ofxaccount.statement.balance && $scope.accounts[i].ofxaccount.statement.balance_date)
             {
                 var balassert = {};
-                balassert.date = $scope.accounts[i].ofxaccounts[0].statement.balance_date;
+                balassert.date = $scope.accounts[i].ofxaccount.statement.balance_date;
                 balassert.payee = "Balance Assertion";
                 balassert.status = "*";
                 var leftAmount = "0.00";
-                var amount = invertAmount(invertAmount($scope.accounts[i].ofxaccounts[0].statement.balance));
-                if ($scope.accounts[i].ofxaccounts[0].statement.currency.toLowerCase() == "usd")
+                var amount = invertAmount(invertAmount($scope.accounts[i].ofxaccount.statement.balance));
+                if ($scope.accounts[i].ofxaccount.statement.currency.toLowerCase() == "usd")
                 {
                     leftAmount = changeToAmericanCurrency(leftAmount);
                     amount = changeToAmericanCurrency(amount);
@@ -1905,7 +1955,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
                     $scope.accounts[i].nTxnIndex = null;
                     $scope.accounts[i].eTxnIndex = null;
                     $scope.accounts[i].transactions = null;
-                    $scope.accounts[i].ofxaccounts = null;
+                    $scope.accounts[i].ofxaccount = null;
                 }
             }
           })
@@ -2003,8 +2053,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
         {
           if (data.contents)
           {
-            item.contents = data.contents;
-            $scope.changeImport(item);
+            $scope.changeImport(item, [data.contents]);
           }
           else
           {

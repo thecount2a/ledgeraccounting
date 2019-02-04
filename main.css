@@ -34,7 +34,16 @@
    position: absolute;
    top: 7px; 
    left: 510px;
-   width: 250px;
+   width: 205px;
+   font-size: 10pt;
+}
+
+.endofacct {
+   display: inline;
+   position: absolute;
+   top: 16px; 
+   left: 720px;
+   width: 45px;
 }
 
 .acctstatus {
