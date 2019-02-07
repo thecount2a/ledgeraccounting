@@ -44,7 +44,6 @@ Huge credit goes to Simon Michael and his team at hledger. Ledgeraccounting is b
 ### Todo:
 
 - Auto-sort ledger by date when new transactions are added (using hledger print).
-- Implement support for import of multi-account OFX/QFX files.
 - Properly implement renewing authentication tokens from Amazon Cognito. Currently, users may be forced to re-login when an authentication token expires after an hour or so.
 - Auto-detect when the user is importing their first OFX file and offer to add an "auto-balancing" transaction instead of complaining that the imported transactions don't add up to the account balance encoded within the OFX file.
 - Implement double-click linking between individual transactions in a register report and the actual editable ledger entry.
