@@ -136,7 +136,7 @@
                   <option value="ofxFile">Import OFX File</option>
                   <option value="ofxConnect">OFX Direct Connect</option>
                 </select>
-                <input type="file" ng-if="item.importType=='ofxFile'" id="file{{item.idx}}" ng-model="item.ofxFile" custom-on-change="changeImportFile" class="btn btn-default acctfile" />
+                <input type="file" multiple ng-if="item.importType=='ofxFile'" id="file{{item.idx}}" ng-model="item.ofxFile" custom-on-change="changeImportFile" class="btn btn-default acctfile" />
                 <input type="text" ng-if="item.importType=='ofxFile'" id="endofacct{{item.idx}}" placeholder="Last 5" ng-model="item.endofacct" class="endofacct" />
                 <div ng-if="(item.importType=='ofxConnect' && !item.ofxInfo)" class="acctofx">
                     
