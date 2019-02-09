@@ -3071,6 +3071,14 @@ $scope.$on('$destroy', function() {
                     }
                     else
                     {
+                      if (Math.abs((validation.output.length - dataToSave.length) / dataToSave.length) < 0.05)
+                      {
+                        dataToSave = validation.output;
+                      }
+                      else
+                      {
+                        alert("Server seemed to lose some of the data while trying to sort the ledger which seems to be bad. Saving unsorted data.");
+                      }
                       $rootScope.enableOverlay();
                       $http.post($rootScope.apihost+"/", {"query": "savefile", "filename": "/online.ledger", "contents": dataToSave, "creds": $rootScope.creds})
                       .success(function(data) {
