@@ -1605,6 +1605,56 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     }
   }
 
+  $scope.filterPossibleConflictingAssertions = function (txns, newTxns) {
+    var acctEarliestTxn = {};
+    for (var i = 0; i < newTxns.length; i++)
+    {
+        for (var j = 0; j < newTxns[i].postings.length; j++)
+        {
+            var dayIndex = $scope.getDayIndexForTransaction(newTxns[i], j);
+            if (acctEarliestTxn[newTxns[i].postings[j].account])
+            {
+                if (acctEarliestTxn[newTxns[i].postings[j].account] > dayIndex)
+                {
+                    acctEarliestTxn[newTxns[i].postings[j].account] = dayIndex;
+                }
+            }
+            else
+            {
+                acctEarliestTxn[newTxns[i].postings[j].account] = dayIndex;
+            }
+        }
+    }
+    var assertionsToFilter = {};
+    var assertionList = [];
+    for (var i = 0; i < txns.length; i++)
+    {
+        // If this is an assertion posting
+        if (txns[i].postings.length == 1 && txns[i].postings[0].amount.indexOf('=') >= 0)
+        {
+            var dayIndex = $scope.getDayIndexForTransaction(txns[i], 0);
+            if (acctEarliestTxn[txns[i].postings[0].account] && acctEarliestTxn[txns[i].postings[0].account] <= dayIndex)
+            {
+                if (assertionsToFilter[txns[i].postings[0].account])
+                {
+                    // If we are filtering more than one per account, it seems fishy. Stop messing with things and return.
+                    console.log("Needed to filter more than one previously added assertion for a particular account: "+txns[i].postings[0].account+". This seems wrong, let's not filter anything to avoid deleting data.");
+                    return txns;
+                }
+                assertionsToFilter[txns[i].postings[0].account] = i;
+                assertionList.push(i);
+            }
+        }
+    }
+    // Remove the specified assertions
+    for (var i = 0; i < assertionList.length; i++)
+    {
+        // Subtract "i" because the list will be shorter after each removal
+        txns.splice(assertionList[i]-i, 1);
+    }
+    return txns;
+  }
+
   $scope.updateTransactions = function(item) {
     item.nTxnIndex = $scope.generateIndex([item.transactions], item.name); 
     item.eTxnIndex = $scope.generateIndex($scope.ledgerSet, item.name);
@@ -1644,6 +1694,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     var tempTxns = angular.copy($scope.ledgerSet[0]);
     tempTxns = tempTxns.concat(angular.copy($scope.ledgerSet[1]));
     var newTxns = $scope.getPendingImportedTransactions(item.name);
+    tempTxns = $scope.filterPossibleConflictingAssertions(tempTxns, newTxns);
     tempTxns = tempTxns.concat(newTxns);
     if ($scope.newlyAddedAccounts[item.name])
     {
@@ -1935,34 +1986,59 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     }
     if (!anyFailures || confirm("Some account(s) may not have imported transactions without errors. Are you sure you want to finish the import process?"))
     {
-        var tempTxns = angular.copy($scope.ledgerSet[1]);
-        var newTxns = $scope.getPendingImportedTransactions(-1);
-        tempTxns = tempTxns.concat(newTxns);
-        var newImportedLedger = objects2ledger(tempTxns);
-        $rootScope.enableOverlay();
-        $http.post($rootScope.apihost+"/", {"query": "savefile", "filename": "/onlineimport.ledger", "contents": newImportedLedger, "creds": $rootScope.creds})
-          .success(function(data) {
+        $http.post($rootScope.apihost+"/", {"query": "getfile", "filename": "/online.ledger", "creds": $rootScope.creds})
+        .success(function(ledgerdata) {
+            $http.post($rootScope.apihost+"/", {"query": "getfile", "filename": "/onlineimport.ledger", "creds": $rootScope.creds})
+            .success(function(importdata) {
+                var tempTxns = ledger2objects(importdata["contents"], false);
+                var mainTxns = ledger2objects(ledgerdata["contents"], false);
+                var newTxns = $scope.getPendingImportedTransactions(-1);
+                tempTxns = $scope.filterPossibleConflictingAssertions(tempTxns, newTxns);
+                mainTxns = $scope.filterPossibleConflictingAssertions(mainTxns, newTxns);
+                tempTxns = tempTxns.concat(newTxns);
+                var newImportedLedger = objects2ledger(tempTxns);
+                var newMainLedger = objects2ledger(mainTxns);
+                $rootScope.enableOverlay();
+                $http.post($rootScope.apihost+"/", {"query": "savefile", "filename": "/onlineimport.ledger", "contents": newImportedLedger, "creds": $rootScope.creds})
+                .success(function(data) {
+                    $http.post($rootScope.apihost+"/", {"query": "savefile", "filename": "/online.ledger", "contents": newMainLedger, "creds": $rootScope.creds})
+                    .success(function(data) {
+                        $rootScope.disableOverlay();
+                        if (data.error)
+                        {
+                            alert("Failed to save imported ledger data: " + data.error);
+                        }
+                        else
+                        {
+                            for (var i = 0; i < $scope.accounts.length; i++)
+                            {
+                                $scope.accounts[i].status = null;
+                                $scope.accounts[i].nTxnIndex = null;
+                                $scope.accounts[i].eTxnIndex = null;
+                                $scope.accounts[i].transactions = null;
+                                $scope.accounts[i].ofxaccount = null;
+                            }
+                        }
+                    })
+                    .error(function(data) {
+                      $rootScope.disableOverlay();
+                      alert("Failed to save main ledger data");
+                    });
+                })
+                .error(function(data) {
+                  $rootScope.disableOverlay();
+                  alert("Failed to save imported ledger data");
+                });
+            })
+            .error(function(data) {
+              $rootScope.disableOverlay();
+              alert("Failed to load imported ledger data");
+            });
+        })
+        .error(function(data) {
             $rootScope.disableOverlay();
-            if (data.error)
-            {
-              alert("Failed to save imported ledger data: " + data.error);
-            }
-            else
-            {
-                for (var i = 0; i < $scope.accounts.length; i++)
-                {
-                    $scope.accounts[i].status = null;
-                    $scope.accounts[i].nTxnIndex = null;
-                    $scope.accounts[i].eTxnIndex = null;
-                    $scope.accounts[i].transactions = null;
-                    $scope.accounts[i].ofxaccount = null;
-                }
-            }
-          })
-          .error(function(data) {
-            $rootScope.disableOverlay();
-            alert("Failed to save imported ledger data");
-          });
+            alert("Failed to load main ledger data");
+        });
     }
   }
 
