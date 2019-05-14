@@ -200,7 +200,7 @@ def lambda_func(event, context = None):
                 command = ["hledger", "-I", "-f", "-", "accounts"]
                 reportType = "accounts"
             elif query['name'] == "budget":
-                command = ["hledger", "-I", "-f", "-", "accounts", "^Income|^Expenses"]
+                command = ["hledger", "-I", "-f", "-", "accounts"]
                 reportType = "budget"
             else:
                 if query['name'] == "balance":
@@ -296,12 +296,14 @@ def lambda_func(event, context = None):
                         result = {"result": output.splitlines()}
                     elif reportType == "budget":
                         allaccounts = output.splitlines()
-                        command = ["hledger", "-I", "-f" , "-", "accounts", "^Assets:|^Liabilities:"]
+                        transactionfilter = '^'+'$|^'.join(filter(lambda aname:aname.find("Off-Budget") < 0 and not aname.startswith("Expenses:") and not aname.startswith("Income:") and not aname.startswith("Equity:"), allaccounts))+ '$'
+                        # Filter and get rid of asset accounts that are part of the budget
+                        allaccounts = filter(lambda aname:aname.find("Off-Budget") >= 0 or not aname.startswith("Assets:"), allaccounts)
+                        command = ["hledger", "-I", "-f" , "-", "print", transactionfilter]
                         begin = time.time()
-                        budgettrackedaccounts, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(budgetledger)
+                        filteredledger, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(defaultledger)
                         end = time.time()
                         cmdtimes.append(end-begin)
-                        accounts = allaccounts + budgettrackedaccounts.splitlines()
                         # Budget report involves 3 reports with various inputs
                         command = ["hledger", "-I", "-f" , "-", "balance", "--tree", "-O", "csv", "-E", "-p", query.get('time', ['thismonth'])]
                         if query.has_key('budgetperiod') and query['budgetperiod'] in ['monthly', 'weekly', 'yearly', 'quarterly', 'daily']:
@@ -321,7 +323,7 @@ def lambda_func(event, context = None):
                             else:
                                 command.append('--monthly')
                             begin = time.time()
-                            spendingoutput, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(defaultledger)
+                            spendingoutput, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(filteredledger)
                             end = time.time()
                             cmdtimes.append(end-begin)
                             if errors:
@@ -334,7 +336,7 @@ def lambda_func(event, context = None):
                                     command.append('--monthly')
 
                                 begin = time.time()
-                                balanceoutput, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(defaultledger+os.linesep+budgetledger)
+                                balanceoutput, errors = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=launch_env).communicate(filteredledger+os.linesep+budgetledger)
                                 end = time.time()
                                 cmdtimes.append(end-begin)
                                 if errors:
@@ -401,7 +403,7 @@ def lambda_func(event, context = None):
                                         columns = columns[firstbudgetidx:]
                                     # Now assemble report rows
                                     totals = {'account': 'Total'}
-                                    for acct in accounts:
+                                    for acct in allaccounts:
                                         if budgetitems.has_key(acct) or spendingitems.has_key(acct) or balanceitems.has_key(acct):
                                             row = {'account': acct}
                                             for col, order, colname, lookupcol in columns:
@@ -421,7 +423,14 @@ def lambda_func(event, context = None):
                                                     else:
                                                         row[colname] = "0"
                                                 aggregate_total(totals, colname, row[colname])
-                                            items.append(row)
+                                            keeprow = False
+                                            if row['account'].startswith('Expenses:') or row['account'].startswith('Income:') or row['account'].startswith('Assets:'):
+                                                keeprow = True
+                                            for colname in row.keys():
+                                                if colname != 'account' and row[colname] != '0':
+                                                    keeprow = True
+                                            if keeprow:
+                                                items.append(row)
                                     items.append(totals)
                                     result["headers"] = header
                                     result["result"] = items
