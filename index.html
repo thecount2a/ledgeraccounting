@@ -173,7 +173,7 @@
                     <h3>Account: {{item.name}}</h3>
                     <table width="98%" style="border-collapse: collapse; border: 1px solid black;" border="1" cellpadding="5">
                       <tr><th width="50%">Imported Transaction</th><th width="50%">Existing Duplicate Transaction</th></tr>
-                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicate: '!!' }">
+                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicateflag: true }">
                           <td><pre style="font-size: 7pt">{{ objects2ledger([item.transactions[txn.ind]], false) }}</pre></td>
                           <td><pre style="font-size: 7pt">{{ objects2ledger([ledgerSet[item.eTxnIndex[txn.duplicate].list][item.eTxnIndex[txn.duplicate].ind]], false) }}</pre></td>
                         </tr>
@@ -186,7 +186,7 @@
                     <h3>Account: {{item.name}}</h3>
                     <table width="75%" style="border-collapse: collapse; border: 1px solid black;" border="1" cellpadding="5">
                       <tr><th width="100%">Imported Transaction</th></tr>
-                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicate: '!' }">
+                        <tr ng-repeat="txn in item.nTxnIndex | filter: { duplicateflag: false }">
                           <td><pre style="font-size: 10pt">{{ objects2ledger([item.transactions[txn.ind]], false) }}</pre></td>
                         </tr>
                     </table>

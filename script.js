@@ -1362,11 +1362,11 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
         {
           for (var j = 0; j < $scope.accounts[i].nTxnIndex.length; j++)
           {
-            if (ttype == "new" && !$scope.accounts[i].nTxnIndex[j].duplicate)
+            if (ttype == "new" && !$scope.accounts[i].nTxnIndex[j].duplicateflag)
             {
               num++;
             }
-            else if (ttype == "duplicate" && $scope.accounts[i].nTxnIndex[j].duplicate)
+            else if (ttype == "duplicate" && $scope.accounts[i].nTxnIndex[j].duplicateflag)
             {
               num++;
             }
@@ -1416,7 +1416,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
         {
           if (lists[i][j].postings[k].account == account)
           {
-              index.push({list:i, ind: j, post: k});
+              index.push({list:i, ind: j, post: k, duplicate: -1, duplicateflag: false});
           }
         }
       }
@@ -1595,6 +1595,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
             {
               item.eTxnIndex[ei].matched = true;
               item.nTxnIndex[i].duplicate = ei;
+              item.nTxnIndex[i].duplicateflag = true;
               item.nTxnIndex[i].matchLevel = level;
               item.nTxnIndex[i].iterationNumber = iterationNumber;
               break;
@@ -1937,7 +1938,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
             var numTxns = 0;
             for (var j = 0; j < $scope.accounts[i].nTxnIndex.length; j++)
             {
-                if (!$scope.accounts[i].nTxnIndex[j].duplicate)
+                if (!$scope.accounts[i].nTxnIndex[j].duplicateflag)
                 {
                     txns.push(angular.copy($scope.accounts[i].transactions[$scope.accounts[i].nTxnIndex[j].ind]));
                     numTxns++;
