@@ -1772,13 +1772,13 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
         {
           posting2.amount = invertAmount(posting2.amount);
         }
-        txn.payee = item.ofxaccount.statement.transactions[i].payee;
+        txn.payee = item.ofxaccount.statement.transactions[i].payee ? item.ofxaccount.statement.transactions[i].payee : (item.ofxaccount.statement.transactions[i].memo ? item.ofxaccount.statement.transactions[i].memo : "Unknown");
         txn.status = "*";
         if (item.ofxaccount.statement.transactions[i].checknum)
         {
           txn.code = item.ofxaccount.statement.transactions[i].checknum;
         }
-        if (item.ofxaccount.statement.transactions[i].memo)
+        if (item.ofxaccount.statement.transactions[i].memo && txn.payee != item.ofxaccount.statement.transactions[i].memo)
         {
           txn.comment = item.ofxaccount.statement.transactions[i].memo;
         }
