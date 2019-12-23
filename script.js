@@ -1684,12 +1684,12 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
         item.eDayIndexList.push(item.eTxnIndex.length);
     }
 
-    // Running match level 0 matches things such as IDs and check numbers
-    $scope.matchTransactions(item, 0, 90, false, 0);
     // Running match level 1 matches amounts only matching exact days
     $scope.matchTransactions(item, 1, 0, false, 1);
     // Running match level 1 matches amounts matching 2 week buffer but use strict checking
     $scope.matchTransactions(item, 1, 7, true, 2);
+    // Running match level 0 matches things such as IDs and check numbers
+    $scope.matchTransactions(item, 0, 90, false, 0);
 
     //console.log(item.nTxnIndex);
     var tempTxns = angular.copy($scope.ledgerSet[0]);
@@ -1720,7 +1720,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     $http.post($rootScope.apihost+"/", {"query": "validate", "contents": newLedger, "assertions": true, "creds": $rootScope.creds})
     .success(function(validation) {
       item.loading = false;
-      if (validation.error)
+      if (validation.error && validation.error.indexOf("balance assertion error") <= 0)
       {
         if(confirm("New version of ledger with imported transactions did not validate due to the following error(s).  Are you sure you want to import this file? " + validation.error))
         {

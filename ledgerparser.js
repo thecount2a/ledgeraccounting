@@ -29,11 +29,52 @@ function isAmericanCurrency(amount) {
     }
 }
 
+function parseCents(amount) {
+    if (isAmericanCurrency(amount))
+    {
+        var simpleamount = amount.replace(/[^0-9.-]+/g,"");
+        var parts = simpleamount.split(".");
+        var returnamount = 0;
+        if (parts.length > 0)
+        {
+            returnamount = Number(parts[0])*100;
+        }
+        if (parts.length > 1)
+        {
+            if (parts[0].indexOf('-') >= 0)
+            {
+                returnamount -= Number(parts[1]);
+            }
+            else
+            {
+                returnamount += Number(parts[1]);
+            }
+        }
+        return returnamount;
+    }
+    else
+    {
+        return undefined;
+    }
+}
+
 function getDayIndex(dateStr) {
     var date = new Date(dateStr);
     if (date)
     {
         return Math.floor(date.valueOf() / 1000.0 / 60.0 / 60.0 / 24.0);
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+function getMonthIndex(dateStr) {
+    var date = new Date(dateStr);
+    if (date)
+    {
+        return date.getMonth() + date.getFullYear() * 12;
     }
     else
     {
@@ -62,6 +103,7 @@ function ledger2objects(data, invert) {
                 {
                     currentTransaction["date"] = line.slice(0, firstSpace);
                     currentTransaction["dayIndex"] = getDayIndex(currentTransaction["date"]);
+                    currentTransaction["monthIndex"] = getMonthIndex(currentTransaction["date"]);
                     var remainingLine = line.slice(firstSpace + 1);
                     if (remainingLine.slice(0, 2) == "! " || remainingLine.slice(0, 2) == "* ")
                     {
@@ -82,10 +124,6 @@ function ledger2objects(data, invert) {
                     }
                     currentTransaction["payee"] = remainingLine;
                 }
-            }
-            else
-            {
-                console.log("ERROR: Unknown transaction start line: "+line);
             }
         }
         else
@@ -155,6 +193,7 @@ function ledger2objects(data, invert) {
                         {
                             currentPosting["amount"] = invertAmount(currentPosting["amount"]);
                         }
+                        currentPosting["amountcents"] = parseCents(currentPosting["amount"]);
                     }
                     else
                     {
@@ -303,3 +342,11 @@ function changeToAmericanCurrency(changeTo)
     }
     return changeTo;
 }
+
+module.exports = {
+   invertAmount: invertAmount,
+   isAmericanCurrency: isAmericanCurrency,
+   ledger2objects: ledger2objects,
+   objects2ledger: objects2ledger,
+   changeToAmericanCurrency:changeToAmericanCurrency
+};
