@@ -1720,7 +1720,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     $http.post($rootScope.apihost+"/", {"query": "validate", "contents": newLedger, "assertions": true, "creds": $rootScope.creds})
     .success(function(validation) {
       item.loading = false;
-      if (validation.error && validation.error.indexOf("balance assertion error") <= 0)
+      if (validation.error)
       {
         if(confirm("New version of ledger with imported transactions did not validate due to the following error(s).  Are you sure you want to import this file? " + validation.error))
         {
