@@ -12,6 +12,7 @@ RUN apt-get install -y vim ledger
 RUN pip install --upgrade pip
 
 RUN pip install web.py boto3 pynacl python-jose ofxhome lxml
+RUN pip install 'keyring==18.0.1'
 RUN git clone https://github.com/captin411/ofxclient.git
 RUN cd ofxclient && python setup.py install
 ADD . /root/ledgereditor/

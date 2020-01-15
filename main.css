@@ -72,6 +72,11 @@
   font-weight: bold;
 }
 
+.statusorange {
+  color: orange;
+  font-weight: bold;
+}
+
 .listitem {
    background-color: #d6dee0;
    padding: 20px;

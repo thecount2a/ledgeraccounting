@@ -1720,7 +1720,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     $http.post($rootScope.apihost+"/", {"query": "validate", "contents": newLedger, "assertions": true, "creds": $rootScope.creds})
     .success(function(validation) {
       item.loading = false;
-      if (validation.error)
+      if (validation.error && validation.error.indexOf("balance assertion error") <= 0)
       {
         if(confirm("New version of ledger with imported transactions did not validate due to the following error(s).  Are you sure you want to import this file? " + validation.error))
         {
@@ -1737,7 +1737,14 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
       }
       else
       {
-          item.status = "success";
+          if (validation.error)
+          {
+            item.status = "success_no_balance";
+          }
+          else
+          {
+            item.status = "success";
+          }
       }
     }).error(function(data) {
       item.loading = false;
@@ -1944,7 +1951,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
                     numTxns++;
                 }
             }
-            if (numTxns > 0 && $scope.accounts[i].ofxaccount && $scope.accounts[i].ofxaccount.statement.balance && $scope.accounts[i].ofxaccount.statement.balance_date)
+            if (numTxns > 0 && $scope.accounts[i].ofxaccount && $scope.accounts[i].ofxaccount.statement.balance && $scope.accounts[i].ofxaccount.statement.balance_date && $scope.accounts[i].status != "success_no_balance")
             {
                 var balassert = {};
                 balassert.date = $scope.accounts[i].ofxaccount.statement.balance_date;
@@ -1971,7 +1978,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     var anyLoading = false;
     for (var i = 0; i < $scope.accounts.length; i++)
     {
-        if (typeof $scope.accounts[i].nTxnIndex == "object" && $scope.accounts[i].nTxnIndex !== null && $scope.accounts[i].status != 'success')
+        if (typeof $scope.accounts[i].nTxnIndex == "object" && $scope.accounts[i].nTxnIndex !== null && $scope.accounts[i].status == 'failure')
         {
             anyFailures = true;
         }
