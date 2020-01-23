@@ -408,9 +408,11 @@
             });
         };
 
-        $rootScope.overlayCount = 0;
+        if (!$rootScope.overlayCount)
+        {
+            $rootScope.overlayCount = 0;
+        }
         $rootScope.enableOverlay = function() {
-            console.log("Enabling overlay");
             if ($rootScope.overlayCount == 0)
             {
                 document.getElementById('loadingOverlay').style.display='block';
@@ -418,7 +420,6 @@
             $rootScope.overlayCount++;
         };
         $rootScope.disableOverlay = function() {
-            console.log("Disabling overlay");
             if ($rootScope.overlayCount <= 1)
             {
                 document.getElementById('loadingOverlay').style.display='none';
