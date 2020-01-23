@@ -32,6 +32,7 @@
     <script data-require="angular-ui-bootstrap@*" data-semver="2.5.0" src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.8/angular-ui-router.js"></script>
     <script src="script.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=0.75, maximum-scale=3.0, minimum-scale=0.75" />
     
     <title>Ledger Accounting</title>
   </head>
@@ -161,7 +162,7 @@
                 </div>
                 <span class="acctstatus" ng-if="(!item.loading && (item.importType=='ofxConnect' && item.ofxInfo && numTransactions('all', item.name, -1) < 0))"><button class="btn btn-success" ng-click="downloadOfx(item);" style="margin-top:-4px;">Download</button></span>
                 <img ng-if="item.loading" style="display:inline;top: 23px; left: 810px; position: absolute;" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-                <span class="acctstatus{{item.status=='error'?' statusred':(item.status=='success'?' statusgreen':(item.status=='success_no_balance'?' statusorange':''))}}" ng-if="(!item.loading && (numTransactions('all', item.name, -1) >= 0))">{{numTransactions('new', item.name, -1)}} new / {{numTransactions('duplicate', item.name, -1)}} dup</span>
+                <span class="acctstatus{{item.status=='error'?' statusred':(item.status=='success'?' statusgreen':'')}}" ng-if="(!item.loading && (numTransactions('all', item.name, -1) >= 0))">{{numTransactions('new', item.name, -1)}} new / {{numTransactions('duplicate', item.name, -1)}} dup</span>
               </form>
             </div>
           </div>

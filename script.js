@@ -162,20 +162,10 @@
                 });
 
                 //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
-                AWS.config.credentials.refresh((error) => {
-                    if (error) {
-                         alert(error);
-                    } else {
-                         $rootScope.creds = {};
-                         $rootScope.creds.awsIdentityId = AWS.config.credentials.identityId;
-                         $rootScope.creds.awsAccessKeyId = AWS.config.credentials.accessKeyId;
-                         $rootScope.creds.awsSecretAccessKey = AWS.config.credentials.secretAccessKey;
-                         $rootScope.creds.awsSessionToken = AWS.config.credentials.sessionToken;
-                         // Instantiate aws sdk service objects now that the credentials have been updated.
-                         $rootScope.s3 = new AWS.S3({region: 'us-east-2'});
-                         $rootScope.localEncryptionKeyBuff = sha256.pbkdf2(nacl.util.decodeUTF8($scope.password), nacl.util.decodeUTF8('encryption:'+$scope.username), 10000, 32);
-                         $scope.loadLedgerList();
-                    }
+                $rootScope.doRefresh(result, function() {
+                    $rootScope.localEncryptionKeyBuff = sha256.pbkdf2(nacl.util.decodeUTF8($scope.password), nacl.util.decodeUTF8('encryption:'+$scope.username), 10000, 32);
+                    localStorage.setItem('localEncryptionKeyBuff', nacl.util.encodeBase64($rootScope.localEncryptionKeyBuff));
+                    $scope.loadLedgerList();
                 });
             },
 
@@ -314,8 +304,12 @@
               $rootScope.creds.ledgerPrefix = $scope.index.ledgers[i].ledgerPrefix;
               $rootScope.ledgerName = $scope.index.ledgers[i].name;
               $rootScope.ledgerIndex = i;
+              localStorage.setItem('encryptionKey', $scope.index.ledgers[i].key);
+              localStorage.setItem('ledgerPrefix', $scope.index.ledgers[i].ledgerPrefix);
+              localStorage.setItem('ledgerIndex', $rootScope.ledgerIndex);
               $uibModalInstance.dismiss('cancel');
               $state.go($state.current, {}, {reload: true});
+              $rootScope.alreadyLoaded = true;
             }
           }
         }
@@ -389,10 +383,34 @@
             ClientId: '3hs1kpq5sg35devvc7qsicen97'
         };
         $rootScope.userPool = new AmazonCognitoIdentity.CognitoUserPool($rootScope.poolData);
-        $rootScope.cognitoUser = null;
+        $rootScope.cognitoUser = $rootScope.userPool.getCurrentUser();
+        $rootScope.setupCreds = function(session, callback) {
+
+            $rootScope.token = session.getAccessToken().getJwtToken();
+            $http.defaults.headers.post['Authorization'] = 'Bearer ' + session.getAccessToken().getJwtToken();
+            // Instantiate aws sdk service objects now that the credentials have been updated.
+            $rootScope.s3 = new AWS.S3({region: 'us-east-2'});
+            $rootScope.creds = {};
+            $rootScope.creds.awsIdentityId = AWS.config.credentials.identityId;
+            $rootScope.creds.awsAccessKeyId = AWS.config.credentials.accessKeyId;
+            $rootScope.creds.awsSecretAccessKey = AWS.config.credentials.secretAccessKey;
+            $rootScope.creds.awsSessionToken = AWS.config.credentials.sessionToken;
+            callback();
+
+        };
+        $rootScope.doRefresh = function(session, callback) {
+            AWS.config.credentials.refresh((error) => {
+                if (error) {
+                     alert(error);
+                } else {
+                     $rootScope.setupCreds(session, callback);
+                }
+            });
+        };
 
         $rootScope.overlayCount = 0;
         $rootScope.enableOverlay = function() {
+            console.log("Enabling overlay");
             if ($rootScope.overlayCount == 0)
             {
                 document.getElementById('loadingOverlay').style.display='block';
@@ -400,6 +418,7 @@
             $rootScope.overlayCount++;
         };
         $rootScope.disableOverlay = function() {
+            console.log("Disabling overlay");
             if ($rootScope.overlayCount <= 1)
             {
                 document.getElementById('loadingOverlay').style.display='none';
@@ -443,7 +462,7 @@
             }
         };
 
-        if (!$rootScope.token)
+        if ($rootScope.cognitoUser == null)
         {
             var modalInstance = $uibModal.open({
               animation: true,
@@ -453,42 +472,71 @@
         }
         else
         {
-            angular.forEach(['/online.ledger', '/onlinebudget.ledger', '/onlineimport.ledger'], function(filename, ind) {
-              $rootScope.enableOverlay();
-              $http.post($rootScope.apihost+"/", {"query": "getfile", "filename": filename, "creds": $rootScope.creds})
-                .success(function(data) {
-                  $rootScope.disableOverlay();
-                  if (data.error)
-                  {
-                    if (data.error != "Missing Auth Header")
-                    {
-                       alert("Failed to get ledger file " + filename + ": " + data.error);
+            AWS.config.region = 'us-east-1';
+            $rootScope.cognitoUser.getSession(function(err, session) {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                    return;
+                }
+                AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                    IdentityPoolId: 'us-east-1:d65d6911-4210-4231-b406-b3905188ee74',
+                    Logins : {
+                        // Change the key below according to the specific region your user pool is in.
+                        'cognito-idp.us-east-1.amazonaws.com/us-east-1_OtLq5WRwj' : session.getIdToken().getJwtToken()
                     }
-                  }
-                  else
-                  {
-                    data = data["contents"];
-                    var invert = filename.indexOf('budget') >= 0 ? true : false;
-                    var rawObjects = ledger2objects(data, invert);
-                    var rawObjectsNoInvert = ledger2objects(data, false);
-                    var objects = [];
-                    var testTranslation = objects2ledger(rawObjectsNoInvert, false).replace(/\s/g, "");
-                    if (data.replace(/\s/g, "") != testTranslation)
+                });
+                $rootScope.doRefresh(session, function() {
+
+                    $rootScope.localEncryptionKeyBuff = nacl.util.decodeBase64(localStorage.getItem('localEncryptionKeyBuff'));
+                    $rootScope.creds.encryptionKey = localStorage.getItem('encryptionKey');
+                    $rootScope.creds.ledgerPrefix = localStorage.getItem('ledgerPrefix');
+                    $rootScope.ledgerIndex = Number(localStorage.getItem('ledgerIndex'));
+
+                    if (!$rootScope.alreadyLoaded)
                     {
-                      if (confirm("This program is not able to read the "+filename+" ledger due to translation issues.  Please click Cancel if you really want to process the ledger anyway, regardless of possible data loss."))
-                      {
-                          document.getElementById('editordiv').innerHTML = '';
-                          return;
-                      }
+                        $state.go($state.current, {}, {reload: true});
+                        $rootScope.alreadyLoaded = true;
                     }
-                    $rootScope.objects[filename] = angular.copy(rawObjects);
-                  }
-                }).error(function(data) {
-                    $rootScope.disableOverlay();
+                    else
+                    {
+                        angular.forEach(['/online.ledger', '/onlinebudget.ledger', '/onlineimport.ledger'], function(filename, ind) {
+                          $rootScope.enableOverlay();
+                          $http.post($rootScope.apihost+"/", {"query": "getfile", "filename": filename, "creds": $rootScope.creds})
+                            .success(function(data) {
+                              $rootScope.disableOverlay();
+                              if (data.error)
+                              {
+                                if (data.error != "Missing Auth Header")
+                                {
+                                   alert("Failed to get ledger file " + filename + ": " + data.error);
+                                }
+                              }
+                              else
+                              {
+                                data = data["contents"];
+                                var invert = filename.indexOf('budget') >= 0 ? true : false;
+                                var rawObjects = ledger2objects(data, invert);
+                                var rawObjectsNoInvert = ledger2objects(data, false);
+                                var objects = [];
+                                var testTranslation = objects2ledger(rawObjectsNoInvert, false).replace(/\s/g, "");
+                                if (data.replace(/\s/g, "") != testTranslation)
+                                {
+                                  if (confirm("This program is not able to read the "+filename+" ledger due to translation issues.  Please click Cancel if you really want to process the ledger anyway, regardless of possible data loss."))
+                                  {
+                                      document.getElementById('editordiv').innerHTML = '';
+                                      return;
+                                  }
+                                }
+                                $rootScope.objects[filename] = angular.copy(rawObjects);
+                              }
+                            }).error(function(data) {
+                                $rootScope.disableOverlay();
+                            });
+                        });
+                    }
                 });
             });
         }
-
     });
 
 
@@ -510,6 +558,9 @@ app.controller('reportsCtrl', ['$scope', '$rootScope', '$state', '$http', 'uiGri
         newTimePeriod = "nogrouping";
     }
     $scope.selectedreport = newReport;
+
+    $scope.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
     if (newTime && newTime[0] == "{")
     {
         var timeStruct = JSON.parse(newTime);
@@ -861,6 +912,7 @@ app.controller('reportsCtrl', ['$scope', '$rootScope', '$state', '$http', 'uiGri
     {
         reportData["accounts"] = $scope.selectedaccounts;
     }
+
     $rootScope.enableOverlay();
     $http.post($rootScope.apihost+"/", reportData)
       .success(function(data) {
@@ -884,17 +936,17 @@ app.controller('reportsCtrl', ['$scope', '$rootScope', '$state', '$http', 'uiGri
                     {
                         if (seenTxnidx && colName == "account")
                         {
-                            defs.push({name: colName, width: '15%', enableCellEdit: false, enableSorting: false, pinnedLeft: true});
-                            defs.push({name: "other account", width: '15%', enableCellEdit: false, enableSorting: false, pinnedLeft: true});
+                            defs.push({name: colName, width: '15%', enableCellEdit: false, enableSorting: false, pinnedLeft: $scope.isMobile ? false : true});
+                            defs.push({name: "other account", width: '15%', enableCellEdit: false, enableSorting: false, pinnedLeft: $scope.isMobile ? false : true});
                         }
                         else
                         {
-                            defs.push({name: colName, width: (colName=="date" ? '140' : '30%'), enableCellEdit: false, enableSorting: false, pinnedLeft: true});
+                            defs.push({name: colName, width: (colName=="date" ? '140' : ($scope.isMobile ? '45%' : '30%')), enableCellEdit: false, enableSorting: false, pinnedLeft: $scope.isMobile ? false : true});
                         }
                     }
                     else if ((colName.search(/[0-9]/) >= 0) && (colName.search('Budget') == 0 || colName.search('Actual') == 0 || colName.search('Balance') == 0))
                     {
-                        defs.push({name: colName, enableCellEdit: false, enableSorting: false, cellTemplate: cellTemp, width: "165"});
+                        defs.push({name: colName, enableCellEdit: false, enableSorting: false, cellTemplate: cellTemp, width: "85"});
                     }
                     else if ((colName.search(/[0-9]/) >= 0) || colName == "amount" || colName == "total" || colName == "balance")
                     {
@@ -1720,7 +1772,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     $http.post($rootScope.apihost+"/", {"query": "validate", "contents": newLedger, "assertions": true, "creds": $rootScope.creds})
     .success(function(validation) {
       item.loading = false;
-      if (validation.error && validation.error.indexOf("balance assertion error") <= 0)
+      if (validation.error)
       {
         if(confirm("New version of ledger with imported transactions did not validate due to the following error(s).  Are you sure you want to import this file? " + validation.error))
         {
@@ -1737,14 +1789,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
       }
       else
       {
-          if (validation.error)
-          {
-            item.status = "success_no_balance";
-          }
-          else
-          {
-            item.status = "success";
-          }
+          item.status = "success";
       }
     }).error(function(data) {
       item.loading = false;
@@ -1951,7 +1996,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
                     numTxns++;
                 }
             }
-            if (numTxns > 0 && $scope.accounts[i].ofxaccount && $scope.accounts[i].ofxaccount.statement.balance && $scope.accounts[i].ofxaccount.statement.balance_date && $scope.accounts[i].status != "success_no_balance")
+            if (numTxns > 0 && $scope.accounts[i].ofxaccount && $scope.accounts[i].ofxaccount.statement.balance && $scope.accounts[i].ofxaccount.statement.balance_date)
             {
                 var balassert = {};
                 balassert.date = $scope.accounts[i].ofxaccount.statement.balance_date;
@@ -1978,7 +2023,7 @@ app.controller('AccountManagerCtrl', function ($scope, $rootScope, $http, $uibMo
     var anyLoading = false;
     for (var i = 0; i < $scope.accounts.length; i++)
     {
-        if (typeof $scope.accounts[i].nTxnIndex == "object" && $scope.accounts[i].nTxnIndex !== null && $scope.accounts[i].status == 'failure')
+        if (typeof $scope.accounts[i].nTxnIndex == "object" && $scope.accounts[i].nTxnIndex !== null && $scope.accounts[i].status != 'success')
         {
             anyFailures = true;
         }
