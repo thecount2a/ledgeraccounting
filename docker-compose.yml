@@ -4,4 +4,4 @@ services:
     restart: always
     image: "ledgeraccounting"
     ports:
-     - "80:8888"
+     - "88:8888"
